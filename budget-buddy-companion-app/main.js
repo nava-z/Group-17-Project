@@ -1,7 +1,20 @@
 import { 
+    Button,
+    ButtonBehavior 
+} from 'buttons';
+
+import { 
     RadioGroup, 
     RadioGroupBehavior
 } from 'buttons';
+
+import {
+    VerticalScroller,
+    VerticalScrollbar,
+    TopScrollerShadow,
+    BottomScrollerShadow
+} from 'scroller';
+
 
 import {
     FieldScrollerBehavior,
@@ -12,76 +25,71 @@ import {
     SystemKeyboard
 } from 'keyboard';
 
-import {
-    VerticalScroller,
-    VerticalScrollbar,
-    TopScrollerShadow,
-    BottomScrollerShadow
-} from 'scroller';
-
 import { 
-    Button,
-    ButtonBehavior 
+    LabeledCheckbox 
 } from 'buttons';
 
-//variables
-
-let total = 1;
-var food = "";
-let calories = 1;
-var backgroundSkin = new Skin({ fill: '#eee' });
-var buttonSkin = new Skin({ fill: '#ccf' });
-var buttonStyle = new Style({ color: 'gray', font: 'bold 24px', horizontal: 'center', vertical: 'middle' });
-var buttonStyle2 = new Style({ color: 'white', font: 'bold 24px', horizontal: 'center', vertical: 'middle' });
-var headerStyle = new Style({ color: '#444', font: 'bold 22px', horizontal: 'center', vertical: 'middle' });
+import Pins from "pins";
 
 
-//questions:
-//new screen scroll
-//variable scope
+//skins
 
-const foods = {
-"Plate of Spaghetti":600,
-"Banana":105,
-"Pop Tart":200,
-"Big Mac":563,
-"Medium Fries":365,
-"Taco":189,
-"Slice of Bread":79,
-"Chocolate Cake":350,
-"Plate of Pad Thai":889,
-"IHOP Chorizo Fiesta Omelette":	1990,
-"Harmless Coconut Water (1 bottle)":120,
-"Boba Milk Tea with Grass Jelly":316,
-"Cup of Black Coffee":5,
-"Grande Caramel Frappuccino":420
-}
+let graySkin = new Skin({ fill : "#C4C4C4" });
+let budgetbuddySkin = new Skin({ fill : "#F3F5C4" });
+let shoppingbuttonSkin = new Skin({ fill : "#2D9CDB" });
+let startshoppingbuttonSkin = new Skin({ fill : "#93EDD4" });
+let shoppingbarSkin = new Skin({ fill : "#56CCF2" });
+let shoppinglistSkin = new Skin({ fill : "#F9CB8F" });
+let shoppingcartSkin = new Skin({ fill : "#6FCF97" });
+let greenbudgetSkin = new Skin({ fill: "#27AE60" });
+let redbudgetSkin = new Skin({ fill: "#F2994A" });
+let yellowbudgetSkin = new Skin({ fill: "#F2D74C" });
 
-//radio buttons
-let foodItems = RadioGroup.template($ => ({
-    top: 10, left: 10, right: 10,
-    Behavior: class extends RadioGroupBehavior {
-        onRadioButtonSelected(buttonName) {
-            trace( buttonName + "\n");
-            food = buttonName;
-            calories = foods[buttonName];
-            trace( "calories is: " + calories + "\n");
-        }
-    }
+let textStyle = new Style({ font: "bold 20px", color: "black" });
+let whiteTextStyle = new Style({ font: "bold 20px", color: "white" });
+let grayTextStyle = new Style({ font: "bold 20px", color: "gray" });
+let bigStyle = new Style({ font: "bold 48px", color: "black" });
+
+var listItems = ["Eggs", "Milk", "Bread"];
+var cartItems = ["Lucerne Eggs", "Horizon Milk", "Wonder Bread", "Odwalla Mango Smoothie", "Meow Mix"];
+var budget = 0;
+
+//Top navbar template
+let topbar = Container.template($ => ({
+    top: 0, height: 25, left: 0, right: 0, skin: shoppingbarSkin,
+    contents: [
+    //add back button
+    ]
 }));
 
-let whiteSkin = new Skin({ fill: "white" });
+
+//empty checkbox template
+let CheckBoxTemplate = LabeledCheckbox.template($ => ({
+    active: true, top: 0, bottom: 0, right: 5,
+    behavior: Behavior({
+    })
+}));
+
+
+//This is the blank screen template
+var ScreenTemplate = Column.template($ => ({
+    top: 0, bottom: 0, left: 0, right: 0, skin: budgetbuddySkin,
+    contents: [
+        new topbar(),
+    ]
+}));
+
+
+//text field
+let whiteSkin = new Skin({ fill: "gray" });
 let nameInputSkin = new Skin({ borders: { left: 2, right: 2, top: 2, bottom: 2 }, stroke: 'gray' });
-let fieldStyle = new Style({ color: 'white', font: 'bold 20px', horizontal: 'left',
+let fieldStyle = new Style({ color: 'gray', font: 'bold 20px', horizontal: 'left',
     vertical: 'middle', left: 5, right: 5, top: 5, bottom: 5 });
 let fieldHintStyle = new Style({ color: '#aaa', font: '15px', horizontal: 'left',
     vertical: 'middle', left: 5, right: 5, top: 5, bottom: 5 });
 let fieldLabelSkin = new Skin({ fill: ['transparent', 'transparent', '#C0C0C0', '#acd473'] });
-
-
-//text field
 let MyField = Container.template($ => ({ 
-    bottom:5, width: 140, height: 30, left: 90, skin: nameInputSkin, contents: [
+    bottom:5, width: 140, height: 30, skin: nameInputSkin, contents: [
         Scroller($, { 
             left: 4, right: 4, top: 4, bottom: 4, active: true, 
             Behavior: FieldScrollerBehavior, clip: true, 
@@ -94,99 +102,104 @@ let MyField = Container.template($ => ({
                         onEdited(label) {
                             let data = this.data;
                             data.name = label.string;
-                            total = parseInt(data.name) * calories;
-                            label.container.hint.visible = (data.name.length == 0);                            
-                            trace(total + "  this is total \n");
-                            
+                            budget = parseInt(data.name);                                                     
                         }
                     },
                 }),
                 Label($, {
                     left: 4, right: 4, top: 4, bottom: 4, style: fieldHintStyle,
-                    string: "Quantity", name: "hint"
+                    string: " ", name: "hint"
                 }),
             ]
         })
     ]
 }));
- 
- 
 
+//STARTING SCREEN CREATION
 
-//Initial Screen
-var initialScreen = Container.template($ => ({
-	left: 0, right: 0, top: 0, bottom: 0, skin: backgroundSkin,
-	contents: [
-		Label($, { left: 0, right: 0, top: 30, style: headerStyle, string: 'Welcome to Calorie Converter' }),
-		Label($, { height: 35, left: 35, right: 35, active: true, string: 'Click to Start', skin: buttonSkin, style: buttonStyle2,
-			behavior: Behavior({
-				onCreate: function(content){
-            		this.upSkin = new Skin({
-                		fill: "black", 
-                		borders: {left: 1, right: 1, top: 1, bottom: 1}, 
-                		stroke: "white"
-            		});
-            		this.downSkin = new Skin({
-             		  fill: "#3AFF3E", 
-              		  borders: {left: 1, right: 1, top: 1, bottom: 1}, 
-              		  stroke: "white"
-           			});
-            		content.skin = this.upSkin;
-        		},
-        		onTouchBegan: function(content){
-          		  content.skin = this.downSkin;
-        		},
-        		onTouchEnded: function(content){
-            		content.skin = this.upSkin;
-            		application.remove(currentScreen);  // Remove the old screen from the application
-            		currentScreen = scrollerExample;  // Make the new screen
-            		application.add(currentScreen);  // Add the new screen to the application
-        		},
-			})
-		})
- 	]
-}));
+var startScreen = new ScreenTemplate();
 
-//scroll container
-let darkGraySkin = new Skin({ fill: "#202020" });
-let titleStyle = new Style({ font: "20px", color: "white" });
-let resultStyle = new Style({ font: "20px", color: "black" });
+    //Mylist button
+    let MylistButtonTemplate = Button.template($ => ({
+      top:70, height: 100, left: 50, right: 50, skin: shoppingbuttonSkin,
+        contents: [
+            Label($, {left: 0, right: 0, height: 50, string: "My List", style: bigStyle})
+        ],
+        Behavior: class extends ButtonBehavior {
+            onTouchEnded(button){
+                application.remove(currentScreen);
+                currentScreen = new ScreenTemplate;
+                currentScreen.add(new AdditemButtonTemplate());
+                application.add(currentScreen);
+            }
+        }
+    }));
 
-let scrollContainer = Container.template($ => ({
-    left: 0, right: 0, top:0, bottom: 0,
-    contents: [
-        VerticalScroller($, { 
-            active: true, top: 10, bottom: 70,
-            contents: [
-                $.contentToScrollVertically,
-                VerticalScrollbar(), 
-                TopScrollerShadow(), 
-                BottomScrollerShadow(),    
-            ] 
-                                
-        }),
-
-        new Container({ 
-            top: 0, height: 20, left: 0, right: 0, skin: darkGraySkin,
-            style: titleStyle, 
-            contents: [
-            	new Label({ string: "Select Food Item" }),
+    //Start Shopping button
+    let StartShoppingButtonTemplate = Button.template($ => ({
+      top:70, height: 100, left: 50, right: 50, skin: shoppingbuttonSkin,
+        contents: [
+            Label($, {left: 0, right: 0, height: 50, string: "Start Shopping", style: bigStyle})
+        ],
+        Behavior: class extends ButtonBehavior {
+            onTouchEnded(button){
+            	application.remove(currentScreen);
+                currentScreen = new ScreenTemplate;
+                currentScreen.add(new topbar());
+                currentScreen.add(new QRCode());
+                currentScreen.add(new scanText());
                 
-            ]
-        }),
-        new Container({ 
-            bottom: 30, height: 40, left: 0, right: 0, skin: darkGraySkin, 
-            style: titleStyle, 
+                application.add(currentScreen);
+            }
+        }
+    }));
+
+    startScreen.add(new MylistButtonTemplate());
+    startScreen.add(new StartShoppingButtonTemplate());
+
+//Shopping Cart Page Creation
+
+	let scanText = Container.template($ => ({
+	    top: 50, height: 25, left: 0, right: 0,
+	    contents: [
+	     new Label({ style: textStyle, 
+	            string: "Scan Cart QR Code" }),
+	    ]
+	}));
+	
+	let qrUrl = new Texture("assets/qrImage.png");	
+		
+	let QRCode = Button.template($ => ({
+		    top: 30, height: 130, width: 130, skin: graySkin ,
+		    contents: [
+		     new Label({string: "Scan Here" , style: whiteTextStyle }),
+		    ],
+		    Behavior: class extends ButtonBehavior {
+	            onTouchEnded(button){
+	                application.remove(currentScreen);
+	                currentScreen = new AddBudgetScreen();
+	                
+	                application.add(currentScreen);
+	            }
+        }
+	}));
+		
+	let AddBudgetScreen = Container.template($ => ({
+	    top: 0, bottom:0, left: 0, right: 0, skin : budgetbuddySkin,
+	    contents: [
+	    	new Container({ 
+            top: 100, height: 40, left: 0, right: 0, 
+            style: textStyle, 
             contents: [
             	
-                new MyField({name: "Enter Quantity"})
+                new MyField({name: "Enter Budget"})
             ]
         }),
         new Container({ 
-            bottom: 0, height: 30, left: 0, right: 0, skin: buttonSkin, 
-            style: titleStyle, 
+            top: 200, height: 30, width: 100, skin: shoppingbuttonSkin, 
+            style: textStyle, 
             contents: [
-            	Label($, { height: 35, left: 25, right: 25, active: true, string: 'Submit', skin: buttonSkin, style: buttonStyle,
+            	Label($, { height: 35, width: 100, active: true, string: 'Enter', style: whiteTextStyle,
 					behavior: Behavior({
 						onCreate: function(content){
 		            		this.upSkin = new Skin({
@@ -200,145 +213,114 @@ let scrollContainer = Container.template($ => ({
 		           			});
 		            		content.skin = this.upSkin;
 		        		},
-		        		onTouchBegan: function(content){
-		        		  
+		        		onTouchBegan: function(content){		        		  
 		          		  content.skin = this.downSkin;
 		        		},
 		        		onTouchEnded: function(content){
 		            		content.skin = this.upSkin;
-		            		SystemKeyboard.hide();
-		            		trace(total + "screen change \n");
-		            		
-		            		application.remove(currentScreen);  // Remove the old screen from the application
-		            		currentScreen = newScreen;  // Make the new screen
-		            		application.add(currentScreen);  // Add the new screen to the application
+		            		SystemKeyboard.hide();		            		
+		            		application.remove(currentScreen);  
+		            		currentScreen = new ScreenTemplate;  
+		            		application.add(currentScreen); 
+		        		},
+					})
+				})
+            ]
+        }),
+        new Container({ 
+            top: 250, height: 30, width: 100, skin: shoppingbuttonSkin, 
+            style: textStyle, 
+            contents: [
+            	Label($, { height: 35, width: 100, active: true, string: 'No Budget', style: whiteTextStyle,
+					behavior: Behavior({
+						onCreate: function(content){
+		            		this.upSkin = new Skin({
+		                		fill: "transparent", 
+		                		
+		            		});
+		            		this.downSkin = new Skin({
+		             		  fill: "#3AFF3E", 
+		              		  borders: {left: 1, right: 1, top: 1, bottom: 1}, 
+		              		  stroke: "white"
+		           			});
+		            		content.skin = this.upSkin;
+		        		},
+		        		onTouchBegan: function(content){		        		  
+		          		  content.skin = this.downSkin;
+		        		},
+		        		onTouchEnded: function(content){
+		            		content.skin = this.upSkin;
+		            		SystemKeyboard.hide();		            		
+		            		application.remove(currentScreen);  
+		            		currentScreen = new ScreenTemplate;  
+		            		application.add(currentScreen); 
 		        		},
 					})
 				})
             ]
         })
-    ]
-    
-}));
-let contentToScrollVertically = new foodItems({buttonNames: "Plate of Spaghetti,Banana,Big Mac,Slice of Bread,Plate of Pad Thai,Boba Milk Tea with Grass Jelly,Grande Caramel Frappuccino,Pop Tart,Medium Fries,Taco,Chocolate Cake,IHOP Chorizo Fiesta Omelette,Harmless Coconut Water (1 bottle),Cup of black coffee"})
-let scrollerExample = new scrollContainer({ contentToScrollVertically });
-
-// new screen
-let newScreenContainer = Container.template($ => ({
-	left: 0, right: 0, top: 0, bottom: 0, skin: backgroundSkin,
-	contents: [
-		VerticalScroller($, { 
-            active: true, top: 10, bottom: 35,
-            contents: [
-                $.resultToScrollVertically,
-                VerticalScrollbar(), 
-                TopScrollerShadow(), 
-                BottomScrollerShadow(),    
-            ] 
-                                
-        }),
-		new Container({ 
-	            top: 0, height: 60, left: 0, right: 0, skin: darkGraySkin,
-            	style: titleStyle, 
-            	contents: [
-					new Label ({ string: "total Calories:  " + total}),
-					
-				],
-				
-		}),
+	    	
+	    ]
+	}));
 		
-		new Container({ 
-            bottom: 0, height: 35, left: 0, right: 0, skin: buttonSkin, 
-            style: titleStyle, 
-            contents: [
-				Label($, { bottom:0, height: 35, left: 0 , width:160,  active: true, string: 'Go Back', skin: buttonSkin, style: buttonStyle2,
-					behavior: Behavior({
-						onCreate: function(content){
-		            		this.upSkin = new Skin({
-		                		fill: "black", 
-		                		borders: {left: 1, right: 1, top: 1, bottom: 1}, 
-		                		stroke: "white"
-		            		});
-		            		this.downSkin = new Skin({
-		             		  fill: "#3AFF3E", 
-		              		  borders: {left: 1, right: 1, top: 1, bottom: 1}, 
-		              		  stroke: "black"
-		           			});
-		            		content.skin = this.upSkin;
-		        		},
-		        		onTouchBegan: function(content){
-		          		  content.skin = this.downSkin;
-		        		},
-		        		onTouchEnded: function(content){
-		            		content.skin = this.upSkin;
-		            		application.remove(currentScreen);  // Remove the old screen from the application
-		            		currentScreen = scrollerExample;  // Make the new screen
-		            		application.add(currentScreen);  // Add the new screen to the application
-		        		},
-					})
-				}),
-				Label($, { bottom:0, height: 35, right:0 ,width:160, active: true, string: 'Done', skin: buttonSkin, style: buttonStyle2,
-					behavior: Behavior({
-						onCreate: function(content){
-		            		this.upSkin = new Skin({
-		                		fill: "black", 
-		                		borders: {left: 1, right: 1, top: 1, bottom: 1}, 
-		                		stroke: "white"
-		            		});
-		            		this.downSkin = new Skin({
-		             		  fill: "#3AFF3E", 
-		              		  borders: {left: 1, right: 1, top: 1, bottom: 1}, 
-		              		  stroke: "black"
-		           			});
-		            		content.skin = this.upSkin;
-		        		},
-		        		onTouchBegan: function(content){
-		          		  content.skin = this.downSkin;
-		        		},
-		        		onTouchEnded: function(content){
-		            		content.skin = this.upSkin;
-		            		application.remove(currentScreen);  // Remove the old screen from the application
-		            		currentScreen = new initialScreen();  // Make the new screen
-		            		application.add(currentScreen);  // Add the new screen to the application
-		        		},
-					})
-				})
-			]
-		})
- 	]
-}));
- 
- 
-function amount(f){
-	return Math.round(total/foods[f]);
-}
+//SHOPPING LIST PAGE CREATION
 
-
-let resultToScrollVertically = new Column({ 
-top: 55, left: 0, right: 0,
-    contents: [
-      Object.keys(foods).map(food =>
-    new Container({
-        height: 30, left: 0, style: titleStyle,
+    //delete item "X" button
+    let DeleteItemButtonTemplate = Button.template($ => ({
+      height: 30, left: 5, skin: shoppinglistSkin,
         contents: [
-        	
-            new Label({ string: "= around  " + amount(food) + " " + food , style: resultStyle })
+            Label($, {height: 30, string: "X", style: grayTextStyle})
+        ],
+        Behavior: class extends ButtonBehavior {
+            onTouchEnded(button){
+                numitems--;
+                application.remove(currentScreen);
+                currentScreen = new ScreenTemplate();
+                //add specific item here
+                for (var i = 0; i < numitems; i++) {                    
+                    currentScreen.add(new shoppinglistitemContainerTemplate());
+                };
+                currentScreen.add(new AdditemButtonTemplate());
+                application.add(currentScreen);
+            }
+        }
+    }));
+
+    var shoppinglistitemContainerTemplate = Container.template($ => ({
+        top: 20, height: 30, left: 20, right: 20, skin: shoppinglistSkin,
+        contents: [
+            new DeleteItemButtonTemplate(),
+            Label($, {left: 30, height: 30, string: "Eggs", style: textStyle}),
+            new CheckBoxTemplate({ name: " " })
         ]
-}))
-    ]
-});
+    }))
+    var numitems = 0;
+    var shoppinglistScreenTemplate = new ScreenTemplate();
+    //add item button
+    let AdditemButtonTemplate = Button.template($ => ({
+      top:20, height: 30, left: 20, right: 20, skin: shoppingbuttonSkin,
+        contents: [
+            Label($, {left: 0, right: 0, height: 50, string: "+ Add item", style: textStyle})
+        ],
+        Behavior: class extends ButtonBehavior {
+            onTouchEnded(button){
+                numitems++;
+                application.remove(currentScreen);
+                currentScreen = new ScreenTemplate();
+                //add specific item here
+                for (var i = 0; i < numitems; i++) {                    
+                    currentScreen.add(new shoppinglistitemContainerTemplate());
+                };
+                currentScreen.add(new AdditemButtonTemplate());
+                application.add(currentScreen);
+
+            }
+        }
+    }));
 
 
-let newScreen = new newScreenContainer({ resultToScrollVertically });
 
-var currentScreen = new initialScreen();
 
-//application
- application.behavior = Behavior({
-    onLaunch: function(application) {
-        application.skin = new Skin({ fill: "white" });
-        application.active = true;
-
-        application.add(currentScreen);
-    }
-})
+//BEGIN PROGRAM BY CREATING START PAGE
+let currentScreen = startScreen;
+application.add(currentScreen)
